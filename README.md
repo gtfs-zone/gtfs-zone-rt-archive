@@ -14,6 +14,20 @@ Records GTFS-realtime feeds and publishes them as
 
 Published packages are browsable at https://accuracy.rt.gtfs.zone.
 
+## Recorder
+
+```bash
+uv run gtfs-zone-rt-archive record
+```
+
+| Env | Default | |
+| --- | --- | --- |
+| `RT_ARCHIVE_FEEDS` | `feeds.yaml` | feed list, see gtfs-zone-infra `gtfs/rt-archive/feeds.yaml` |
+| `RT_ARCHIVE_DATA_DIR` | `data` | open hour and upload queue |
+| `S3_ENDPOINT`, `S3_REGION` | -, `garage` | S3-compatible storage |
+| `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` | - | raw bucket |
+| `GATUS_URL`, `GATUS_ENDPOINT_KEY`, `GATUS_TOKEN` | unset | heartbeat; off when unset |
+
 ## License
 
 AGPL-3.0-or-later. See [LICENSE.txt](LICENSE.txt).

@@ -16,6 +16,22 @@ accuracy.rt.gtfs.zone).
   the `gtfs-zone/predictions` branch of
   [gtfs-zone/TIDES](https://github.com/gtfs-zone/TIDES).
 
+## Commands
+
+```bash
+scripts/check.sh                 # ruff, vulture, deptry, pytest (pre-commit and CI)
+uv run gtfs-zone-rt-archive record
+```
+
+## Recorder
+
+`recorder.py` runs one thread per enabled feed in `feeds.yaml`
+(`config.py`). Each poll writes raw lines through `store.Writer`; a closed
+hour is compressed to `.jsonl.zst` and `upload.Uploader` sweeps the data dir
+into `raw/<feed>/` of the raw bucket, deleting local files once verified.
+`heartbeat.py` pushes per-feed health to Gatus once a minute. The raw line
+format is in the `store.py` docstring.
+
 ## Conventions
 
 - **Commits**: Conventional Commits, enforced by the `commit-msg` hook. Never add
