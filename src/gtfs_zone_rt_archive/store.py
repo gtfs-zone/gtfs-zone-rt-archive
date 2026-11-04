@@ -39,6 +39,9 @@ _PARAMS = zstandard.ZstdCompressionParameters.from_level(
     19, window_log=27, enable_ldm=True, write_checksum=True
 )
 _MAX_WINDOW = 2**27
+# Every feed rolls over at the same second; one compression at a time keeps
+# peak memory at about 4x one plain hour.
+_COMPRESS_LOCK = threading.Lock()
 
 
 def _sha(data: bytes) -> str:
@@ -73,6 +76,11 @@ def _ends_newline(p: Path) -> bool:
 
 def compress(plain: Path) -> Path:
     """Plain .jsonl to .jsonl.zst, verified by read-back; the plain file is removed."""
+    with _COMPRESS_LOCK:
+        return _compress_locked(plain)
+
+
+def _compress_locked(plain: Path) -> Path:
     data = plain.read_bytes()
     out = plain.with_suffix(".jsonl.zst")
     tmp = plain.with_suffix(".jsonl.zst.tmp")
