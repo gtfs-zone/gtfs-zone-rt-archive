@@ -26,4 +26,18 @@ uv tool install prek
 prek install
 ```
 
+- **pre-commit**: Runs `scripts/check.sh`
 - **commit-msg**: Validates commit message format using commitizen
+
+## Releases
+
+On `main`:
+
+```bash
+cz bump
+git push --follow-tags origin main
+```
+
+The `v*` tag triggers `.github/workflows/build.yml`, which pushes
+`ghcr.io/gtfs-zone/gtfs-zone-rt-archive` and writes its digest into
+gtfs-zone-infra `gtfs/kustomization.yaml`, which ArgoCD rolls out.
