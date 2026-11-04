@@ -1,0 +1,43 @@
+publiccodeYmlVersion: "0.4"
+
+name: GTFS.zone RT Archive
+url: "https://github.com/gtfs-zone/gtfs-zone-rt-archive"
+
+platforms:
+  - linux
+
+categories:
+  - data-collection
+  - data-analytics
+
+developmentStatus: concept
+
+softwareType: "standalone/backend"
+
+description:
+  en:
+    shortDescription: >
+      Records GTFS-realtime feeds and publishes them as TIDES data packages.
+    longDescription: >
+      GTFS.zone RT Archive polls a configured list of GTFS-realtime feeds,
+      stores the raw responses in object storage, and builds a daily TIDES
+      data package per feed with actual stop visits, vehicle locations and
+      the feed's own stop time predictions, for prediction accuracy checks.
+    features:
+      - GTFS-realtime recorder for a configured list of feeds
+      - Raw hourly archive in S3-compatible storage
+      - Daily TIDES data packages with stop time predictions
+
+legal:
+  license: AGPL-3.0-or-later
+
+maintenance:
+  type: community
+  contacts:
+    - name: Max Katz-Christy
+      email: maxkatzchristy@gmail.com
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
