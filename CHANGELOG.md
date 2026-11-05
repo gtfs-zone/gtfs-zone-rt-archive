@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.2.0 (2026-11-05)
+
+### Feat
+
+- **pipeline**: add the Dagster code location with a daily schedule
+- **tides**: build and publish TIDES packages from the raw bucket
+
+### Refactor
+
+- **store**: parse segments from any binary stream
+
 ## v0.1.0 (2026-11-05)
 
 ### Feat

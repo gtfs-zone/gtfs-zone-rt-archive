@@ -1,6 +1,6 @@
 [project]
 name = "gtfs-zone-rt-archive"
-version = "0.1.0"
+version = "0.2.0"
 requires-python = ">=3.13"
 description = "Records GTFS-realtime feeds and publishes them as TIDES data packages"
 license = "AGPL-3.0-or-later"
