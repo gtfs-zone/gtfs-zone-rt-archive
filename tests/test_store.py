@@ -2,6 +2,8 @@
 
 import base64
 
+import zstandard
+
 from gtfs_zone_rt_archive import store
 from gtfs_zone_rt_archive.store import Writer, read_segment, segments
 
@@ -40,7 +42,15 @@ def test_same_body_is_deduped_within_a_segment_and_filled_back(tmp_path):
 
     plain = (tmp_path / "2026-11-05" / "11.jsonl").read_text()
     assert '"b64"' in plain
-    stored = [line for p in segments(tmp_path) for line in store._read(p)]
+    stored = [
+        line
+        for p in segments(tmp_path)
+        for line in (
+            zstandard.ZstdDecompressor().decompress(p.read_bytes()).decode()
+            if p.suffix == ".zst"
+            else p.read_text()
+        ).splitlines()
+    ]
     assert sum('"same":true' in s for s in stored) == 1
     assert all(base64.b64decode(line["b64"]) == b"a" for line in _all(tmp_path))
 
