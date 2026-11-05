@@ -32,6 +32,17 @@ into `raw/<feed>/` of the raw bucket, deleting local files once verified.
 `heartbeat.py` pushes per-feed health to Gatus once a minute. The raw line
 format is in the `store.py` docstring.
 
+## TIDES build
+
+`pipeline/definitions.py` partitions `tides_package` by feed and service
+date. `publish.build_day` picks the GTFS snapshot live at local noon
+(`gtfs.py`), reads the raw hours from local midnight of D to midnight of
+D + build_lag_days + 1 (`raw.py`), feeds the polls to `tides.DayBuilder` and
+uploads the package and `index.json`. Actuals are `actuals.actual_times()`, a
+port of the pollers' scratch `build.py`. Output columns follow the schemas
+vendored in `schemas/` from the TIDES fork commit `publish.TIDES_REF`; refresh
+both together.
+
 ## Conventions
 
 - **Commits**: Conventional Commits, enforced by the `commit-msg` hook. Never add

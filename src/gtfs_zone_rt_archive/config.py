@@ -24,7 +24,7 @@ class Feed(BaseModel):
     trip_updates: str = Field(pattern=r"^https?://")
     service_alerts: str | None = Field(default=None, pattern=r"^https?://")
     poll: int = Field(default=15, ge=5, le=300)
-    build_lag_days: int = Field(default=1, ge=0, le=7)
+    build_lag_days: int = Field(default=1, ge=1, le=7)
 
     def rt_urls(self) -> dict[str, str]:
         """GTFS-RT URLs by raw line `feed` kind: vp, tu and al when set."""
@@ -101,5 +101,22 @@ class RecorderSettings:
             feeds=Path(_env("RT_ARCHIVE_FEEDS", "feeds.yaml")),
             data_dir=Path(_env("RT_ARCHIVE_DATA_DIR", "data")),
             s3=S3Settings.from_env(),
+            gatus=GatusSettings.from_env(),
+        )
+
+
+@dataclass(frozen=True)
+class BuildSettings:
+    feeds: Path
+    raw: S3Settings
+    tides: S3Settings
+    gatus: GatusSettings
+
+    @classmethod
+    def from_env(cls) -> Self:
+        return cls(
+            feeds=Path(_env("RT_ARCHIVE_FEEDS", "feeds.yaml")),
+            raw=S3Settings.from_env("RAW_"),
+            tides=S3Settings.from_env("TIDES_"),
             gatus=GatusSettings.from_env(),
         )
