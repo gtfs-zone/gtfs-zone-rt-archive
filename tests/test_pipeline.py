@@ -89,3 +89,10 @@ def test_heartbeat_waits_for_every_scheduled_feed(defs, monkeypatch):
             instance=instance,
         )
         assert pushed == ([] if feed == "amtrak" else [True])
+
+
+def test_run_storage_url_uses_psycopg2():
+    from sqlalchemy.engine import make_url
+
+    # The infra dagster.yaml passes a bare postgresql:// URL.
+    assert make_url("postgresql://u:p@h/db").get_dialect().driver == "psycopg2"
