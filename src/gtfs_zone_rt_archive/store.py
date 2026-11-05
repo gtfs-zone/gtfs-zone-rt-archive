@@ -223,20 +223,17 @@ def segments(feed_dir: Path) -> list[Path]:
     return [out[k] for k in sorted(out)]
 
 
-def _read(path: Path) -> Iterator[str]:
-    if path.suffix == ".zst":
-        dctx = zstandard.ZstdDecompressor(max_window_size=_MAX_WINDOW)
-        with path.open("rb") as fh, dctx.stream_reader(fh) as r:
-            yield from io.TextIOWrapper(r, encoding="utf-8")
-    else:
-        with path.open() as fh:
-            yield from fh
-
-
-def read_segment(path: Path) -> Iterator[dict[str, Any]]:
-    """A segment's lines with deduped raw bodies filled back in."""
+def parse_segment(fh: IO[bytes], zst: bool = True) -> Iterator[dict[str, Any]]:
+    """A segment's lines from a binary stream, deduped raw bodies filled back in."""
     last_b64: dict[str, str] = {}
-    for text in _read(path):
+    if zst:
+        dctx = zstandard.ZstdDecompressor(max_window_size=_MAX_WINDOW)
+        texts: Iterator[str] = io.TextIOWrapper(
+            dctx.stream_reader(fh), encoding="utf-8"
+        )
+    else:
+        texts = io.TextIOWrapper(fh, encoding="utf-8")
+    for text in texts:
         try:
             line = json.loads(text)
         except ValueError:
@@ -247,6 +244,12 @@ def read_segment(path: Path) -> Iterator[dict[str, Any]]:
             elif "b64" in line:
                 last_b64[line["url"]] = line["b64"]
         yield line
+
+
+def read_segment(path: Path) -> Iterator[dict[str, Any]]:
+    """A segment file's lines with deduped raw bodies filled back in."""
+    with path.open("rb") as fh:
+        yield from parse_segment(fh, path.suffix == ".zst")
 
 
 def lines(feed_dir: Path) -> Iterator[dict[str, Any]]:
