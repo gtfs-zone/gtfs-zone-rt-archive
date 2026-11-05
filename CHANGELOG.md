@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1 (2026-11-05)
+
+### Fix
+
+- **pipeline**: pin sqlalchemy below 2.1 for the psycopg2 run storage
+
 ## v0.2.0 (2026-11-05)
 
 ### Feat
