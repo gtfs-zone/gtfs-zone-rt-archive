@@ -25,10 +25,14 @@ WORKDIR /app
 # Same ids as the Deployments' securityContext.
 RUN groupadd -g 10001 archive && useradd -u 10001 -g archive -M archive
 
+# DAGSTER_HOME must exist and be writable by the runtime user.
+RUN mkdir -p /app/dagster_home && chown archive:archive /app/dagster_home
+
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 
 ENV PATH="/app/.venv/bin:$PATH" \
+    DAGSTER_HOME=/app/dagster_home \
     RT_ARCHIVE_FEEDS=/config/feeds.yaml \
     RT_ARCHIVE_DATA_DIR=/data
 

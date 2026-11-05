@@ -77,3 +77,22 @@ class Heartbeat:
         with httpx.Client(timeout=10) as http:
             while not stop.wait(PUSH_INTERVAL):
                 self.push(http, time.time())
+
+
+def push_success(gatus: GatusSettings) -> bool:
+    """POST one success result to Gatus; returns whether it was accepted."""
+    if not gatus.url or not gatus.endpoint_key:
+        log.info("GATUS_URL or GATUS_ENDPOINT_KEY unset; not pushing a heartbeat")
+        return False
+    url = f"{gatus.url.rstrip('/')}/api/v1/endpoints/{gatus.endpoint_key}/external"
+    try:
+        httpx.post(
+            url,
+            params={"success": "true"},
+            headers={"Authorization": f"Bearer {gatus.token}"},
+            timeout=10,
+        ).raise_for_status()
+    except httpx.HTTPError as exc:
+        log.warning("gatus heartbeat push failed: %r", exc)
+        return False
+    return True
