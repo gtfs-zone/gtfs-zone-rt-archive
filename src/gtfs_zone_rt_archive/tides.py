@@ -456,6 +456,7 @@ class DayBuilder:
                         "producer": self.producer,
                         "prediction_timestamp": iso(row["prediction_timestamp"]),
                         "trip_id_scheduled": perf.trip.trip_id,
+                        "scheduled_stop_sequence": st.stop_sequence,
                         "vehicle_id": row["vehicle_id"] or owner,
                         "stop_id": st.stop_id,
                         "predicted_arrival_time": iso(row["predicted_arrival_time"]),
