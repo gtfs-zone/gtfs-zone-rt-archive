@@ -1,0 +1,302 @@
+{
+  "primaryKey": [
+    "service_date",
+    "trip_id_performed"
+  ],
+  "missingValues": [
+    "NA",
+    "NaN",
+    ""
+  ],
+  "fields": [
+    {
+      "name": "service_date",
+      "type": "date",
+      "description": "Service date. References GTFS",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "trip_id_performed",
+      "type": "string",
+      "description": "Uniquely identifies the trip performed. It must be unique for a service_date (and it can optionally be unique across all time). It does not have to equal trip_id_scheduled.",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "vehicle_id",
+      "type": "string",
+      "title": "ID referencing vehicles.vehicle_id",
+      "description": "Identifies the vehicle.",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "trip_id_scheduled",
+      "type": "string",
+      "title": "ID referencing GTFS trips.trip_id",
+      "description": "Identifies the scheduled trip associated with the trip performed. One scheduled trip may be associated with multiple operated trips, or an operated trip may not be associated with a scheduled trip. References GTFS.  If this trip was published in GTFS Schedule, this value should be consistent with the GTFS `trip_id`.  If this trip was not scheduled, the value should be Null."
+    },
+    {
+      "name": "route_id",
+      "type": "string",
+      "title": "ID referencing GTFS routes.route_id",
+      "description": "Identifies the route. References GTFS"
+    },
+    {
+      "name": "route_type",
+      "type": "string",
+      "description": "Indicates the type of transportation used on a route. References GTFS routes.route_type including Google's [Extended Route Types](https://developers.google.com/transit/gtfs/reference/extended-route-types) GTFS extension",
+      "constraints": {
+        "enum": [
+          "Tram / Streetcar / Light rail",
+          "Subway / Metro",
+          "Rail",
+          "Bus",
+          "Ferry",
+          "Cable tram",
+          "Aerial lift",
+          "Funicular",
+          "Trolleybus",
+          "Monorail",
+          "Railway Service",
+          "High Speed Rail Service",
+          "Long Distance Trains",
+          "Inter Regional Rail Service",
+          "Car Transport Rail Service",
+          "Sleeper Rail Service",
+          "Regional Rail Service",
+          "Tourist Railway Service",
+          "Rail Shuttle (Within Complex)",
+          "Suburban Railway",
+          "Replacement Rail Service",
+          "Special Rail Service",
+          "Lorry Transport Rail Service",
+          "All Rail Services",
+          "Cross-Country Rail Service",
+          "Vehicle Transport Rail Service",
+          "Rack and Pinion Railway",
+          "Additional Rail Service",
+          "Coach Service",
+          "International Coach Service",
+          "National Coach Service",
+          "Shuttle Coach Service",
+          "Regional Coach Service",
+          "Special Coach Service",
+          "Sightseeing Coach Service",
+          "Tourist Coach Service",
+          "Commuter Coach Service",
+          "All Coach Services",
+          "Urban Railway Service",
+          "Metro Service",
+          "Underground Service",
+          "All Urban Railway Services",
+          "Bus Service",
+          "Regional Bus Service",
+          "Express Bus Service",
+          "Stopping Bus Service",
+          "Local Bus Service",
+          "Night Bus Service",
+          "Post Bus Service",
+          "Special Needs Bus",
+          "Mobility Bus Service",
+          "Mobility Bus for Registered Disabled",
+          "Sightseeing Bus",
+          "Shuttle Bus",
+          "School Bus",
+          "School and Public Service Bus",
+          "Rail Replacement Bus Service",
+          "Demand and Response Bus Service",
+          "All Bus Services",
+          "Trolleybus Service",
+          "Tram Service",
+          "City Tram Service",
+          "Local Tram Service",
+          "Regional Tram Service",
+          "Sightseeing Tram Service",
+          "Shuttle Tram Service",
+          "All Tram Services",
+          "Water Transport Service",
+          "Air Service",
+          "Ferry Service",
+          "Aerial Lift Service",
+          "Telecabin Service",
+          "Cable Car Service",
+          "Elevator Service",
+          "Chair Lift Service",
+          "Drag Lift Service",
+          "Small Telecabin Service",
+          "All Telecabin Services",
+          "Funicular Service",
+          "Taxi Service",
+          "Communal Taxi Service",
+          "Water Taxi Service",
+          "Rail Taxi Service",
+          "Bike Taxi Service",
+          "Licensed Taxi Service",
+          "Private Hire Service Vehicle",
+          "All Taxi Services",
+          "Miscellaneous Service",
+          "Horse-drawn Carriage"
+        ]
+      }
+    },
+    {
+      "name": "ntd_mode",
+      "type": "string",
+      "description": "NTD mode, references the Modes and Types of Service section of the Introduction to the NTD Full Reporting Policy Manual <https://www.transit.dot.gov/ntd/manuals>",
+      "constraints": {
+        "enum": [
+          "Aerial Tramway",
+          "Alaska Railroad",
+          "Bus",
+          "Bus Rapid Transit",
+          "Cable Car",
+          "Commuter Bus",
+          "Commuter Rail",
+          "Demand Response",
+          "Demand Taxi",
+          "Ferryboat",
+          "Heavy Rail",
+          "Hybrid Rail",
+          "Inclined Plane",
+          "Jitney",
+          "Light Rail",
+          "Monorail/Automated Guideway",
+          "Other",
+          "Público",
+          "Streetcar",
+          "Trolleybus",
+          "Vanpool"
+        ]
+      }
+    },
+    {
+      "name": "route_type_agency",
+      "type": "string",
+      "description": "Agency specific route type"
+    },
+    {
+      "name": "shape_id",
+      "type": "string",
+      "title": "ID referencing shapes.shape_id",
+      "description": "Identifies a geospatial shape that describes the vehicle travel path for a trip. References GTFS"
+    },
+    {
+      "name": "pattern_id",
+      "type": "string",
+      "title": "unique identifier for the route-pattern",
+      "description": "Identifies the unique stop-path for a trip, may be distinct from GTFS shapes.shape_id"
+    },
+    {
+      "name": "direction_id",
+      "type": "integer",
+      "description": "Indicates the direction of travel for a trip. References GTFS",
+      "constraints": {
+        "enum": [
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "operator_id",
+      "type": "string",
+      "title": "ID referencing operators.operator_id",
+      "description": "Identifies the vehicle’s operator."
+    },
+    {
+      "name": "block_id",
+      "type": "string",
+      "title": "ID referencing trips.block_id",
+      "description": "Identifies the block to which the trip belongs. A block consists of a single trip, or many sequential trips made using the same vehicle, defined by shared service days and block_id. A block_id can have trips with different service days, making distinct blocks. See example in GTFS documentation. References GTFS"
+    },
+    {
+      "name": "trip_start_stop_id",
+      "type": "string",
+      "title": "ID referencing GTFS stops.stop_id",
+      "description": "Origin stop_id. References GTFS"
+    },
+    {
+      "name": "trip_end_stop_id",
+      "type": "string",
+      "title": "ID referencing GTFS stops.stop_id",
+      "description": "Destination stop_id. References GTFS"
+    },
+    {
+      "name": "schedule_trip_start",
+      "type": "datetime",
+      "description": "Scheduled departure time from the trip’s origin."
+    },
+    {
+      "name": "schedule_trip_end",
+      "type": "datetime",
+      "description": "Scheduled end timestamp at the trip’s destination."
+    },
+    {
+      "name": "actual_trip_start",
+      "type": "datetime",
+      "description": "Timestamp at which the vehicle departed its origin."
+    },
+    {
+      "name": "actual_trip_end",
+      "type": "datetime",
+      "description": "Timestamp at which the vehicle arrived at its destination."
+    },
+    {
+      "name": "trip_type",
+      "type": "string",
+      "description": "Indicates status of travel with regard to service.",
+      "constraints": {
+        "enum": [
+          "In service",
+          "Deadhead",
+          "Layover",
+          "Pullout",
+          "Pullin",
+          "Extra Pullout",
+          "Extra Pullin",
+          "Deadhead To Layover",
+          "Deadhead From Layover",
+          "Other not in service"
+        ]
+      }
+    },
+    {
+      "name": "schedule_relationship",
+      "type": "string",
+      "description": "Indicates the status of the trip. References GTFS-realtime TripUpdate.trip.schedule_relationship",
+      "constraints": {
+        "enum": [
+          "Scheduled",
+          "Added",
+          "Unscheduled",
+          "Canceled",
+          "Duplicated"
+        ]
+      }
+    }
+  ],
+  "foreignReferences": [
+    {
+      "fields": "vehicle_id",
+      "reference": {
+        "resource": "vehicles",
+        "fields": "vehicle_id"
+      }
+    },
+    {
+      "fields": "operator_id",
+      "reference": {
+        "resource": "operators",
+        "fields": "operator_id"
+      }
+    }
+  ],
+  "name": "trips_performed.schema.json",
+  "description": "Trips performed for each service date.",
+  "_table_type": "Summary"
+}

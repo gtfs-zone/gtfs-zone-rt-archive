@@ -1,0 +1,144 @@
+{
+  "primaryKey": [
+    "service_date",
+    "trip_id_performed",
+    "trip_stop_sequence",
+    "producer",
+    "prediction_timestamp"
+  ],
+  "missingValues": [
+    "NA",
+    "NaN",
+    ""
+  ],
+  "fields": [
+    {
+      "name": "service_date",
+      "type": "date",
+      "description": "Service date. References GTFS indirectly via calendars.txt and calendar_dates.txt",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "trip_id_performed",
+      "type": "string",
+      "title": "ID referencing trips_performed.trip_id_performed",
+      "description": "Identifies the trip performed",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "trip_stop_sequence",
+      "type": "integer",
+      "title": "Positive integer referencing stop_visits.trip_stop_sequence",
+      "description": "The actual order of stops visited within a performed trip, matching the stop_visits row the prediction is for.",
+      "constraints": {
+        "required": true,
+        "minimum": 1
+      }
+    },
+    {
+      "name": "producer",
+      "type": "string",
+      "title": "Identifier of the prediction source",
+      "description": "Identifies the system that made the prediction, for example a GTFS-realtime TripUpdates feed. Lets one data package compare several prediction sources for the same stop visits.",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "prediction_timestamp",
+      "type": "datetime",
+      "description": "Timestamp at which the prediction was made (for GTFS-realtime, TripUpdate.timestamp or else FeedHeader.timestamp). A row only appears when a predicted time changes, and it holds until the next row with the same service_date, trip_id_performed, trip_stop_sequence and producer. A row with both predicted_arrival_time and predicted_departure_time empty withdraws the prediction: the producer stopped predicting the stop before it was visited, or the recording has a gap, and the previous row no longer holds.",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "trip_id_scheduled",
+      "type": "string",
+      "title": "ID referencing GTFS trips.trip_id",
+      "description": "Identifies the scheduled trip associated with the trip performed. References GTFS"
+    },
+    {
+      "name": "vehicle_id",
+      "type": "string",
+      "title": "ID referencing vehicles.vehicle_id",
+      "description": "Identifies the vehicle the prediction was made for."
+    },
+    {
+      "name": "stop_id",
+      "type": "string",
+      "title": "ID referencing GTFS stops.stop_id",
+      "description": "Identifies the stop. References GTFS"
+    },
+    {
+      "name": "predicted_arrival_time",
+      "type": "datetime",
+      "description": "Predicted timestamp at which the vehicle arrives at the stop. Empty when the row withdraws the prediction (see prediction_timestamp)."
+    },
+    {
+      "name": "predicted_departure_time",
+      "type": "datetime",
+      "description": "Predicted timestamp at which the vehicle departs the stop. Empty when the row withdraws the prediction (see prediction_timestamp)."
+    },
+    {
+      "name": "arrival_uncertainty",
+      "type": "integer",
+      "description": "Expected error of predicted_arrival_time in seconds, as given by the producer.",
+      "constraints": {
+        "minimum": 0
+      }
+    },
+    {
+      "name": "departure_uncertainty",
+      "type": "integer",
+      "description": "Expected error of predicted_departure_time in seconds, as given by the producer.",
+      "constraints": {
+        "minimum": 0
+      }
+    },
+    {
+      "name": "schedule_relationship",
+      "type": "string",
+      "description": "Indicates the predicted status of the stop.",
+      "constraints": {
+        "enum": [
+          "Scheduled",
+          "Skipped",
+          "Added",
+          "Missing"
+        ]
+      }
+    }
+  ],
+  "foreignReferences": [
+    {
+      "fields": [
+        "service_date",
+        "trip_id_performed",
+        "trip_stop_sequence"
+      ],
+      "reference": {
+        "resource": "stop_visits",
+        "fields": [
+          "service_date",
+          "trip_id_performed",
+          "trip_stop_sequence"
+        ]
+      }
+    },
+    {
+      "fields": "vehicle_id",
+      "reference": {
+        "resource": "vehicles",
+        "fields": "vehicle_id"
+      }
+    }
+  ],
+  "name": "stop_time_predictions",
+  "description": "Predicted arrival and departure times by trip and stop for each service date, recorded each time a producer changes its prediction.",
+  "_table_type": "Event"
+}
