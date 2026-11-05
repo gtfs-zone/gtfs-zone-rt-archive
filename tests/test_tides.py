@@ -103,6 +103,20 @@ def test_unchanged_predictions_are_written_once():
     assert _predictions(pkg, 3) == [(iso(A - 60), iso(C + 60))]
 
 
+def test_predictions_carry_the_gtfs_stop_sequence_of_their_visit():
+    b = _builder()
+    _drive(b, A - 60, C + 60, updates=lambda c: [("T1", SD, [(2, 0), (3, 60)])])
+    pkg = b.finish()
+    visits = {
+        r["trip_stop_sequence"]: r["scheduled_stop_sequence"]
+        for r in pkg.tables["stop_visits"]
+    }
+    preds = pkg.tables["stop_time_predictions"]
+    assert preds
+    for r in preds:
+        assert r["scheduled_stop_sequence"] == visits[r["trip_stop_sequence"]]
+
+
 def test_a_stop_leaving_the_feed_before_its_actual_is_withdrawn():
     b = _builder()
 

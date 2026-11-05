@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 VERSION = version("gtfs-zone-rt-archive")
 BASE_URL = "https://archive.rt.gtfs.zone"
 # The gtfs-zone/predictions commit the vendored schemas were copied from.
-TIDES_REF = "13b0a0132b22d74b0f1f564ae11e394457ac4669"
+TIDES_REF = "5a28cac520840de06f59479f8f098825b4f348e5"
 TIDES_SPEC = f"https://raw.githubusercontent.com/gtfs-zone/TIDES/{TIDES_REF}/spec"
 INDEX = "index.json"
 PACKAGE_CACHE = "public, max-age=86400"

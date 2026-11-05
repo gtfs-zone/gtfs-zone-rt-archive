@@ -63,6 +63,15 @@
       "description": "Identifies the scheduled trip associated with the trip performed. References GTFS"
     },
     {
+      "name": "scheduled_stop_sequence",
+      "type": "integer",
+      "title": "positive integer referencing GTFS stop_times.stop_sequence",
+      "description": "Scheduled order of the stop within trip_id_scheduled. With service_date and trip_id_scheduled it identifies the stop without stop_visits, so predictions can be matched to stop visits from another source. References GTFS",
+      "constraints": {
+        "minimum": 0
+      }
+    },
+    {
       "name": "vehicle_id",
       "type": "string",
       "title": "ID referencing vehicles.vehicle_id",
