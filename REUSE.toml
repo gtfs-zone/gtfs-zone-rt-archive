@@ -5,3 +5,9 @@ path = "**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Max Katz-Christy and gtfs.zone contributors"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = ["src/gtfs_zone_rt_archive/schemas/**", "tests/fixtures/tides-datapackage-profile.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2023 TIDES Board of Directors"
+SPDX-License-Identifier = "CC-BY-4.0"

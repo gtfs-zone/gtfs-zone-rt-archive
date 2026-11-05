@@ -5,10 +5,14 @@ requires-python = ">=3.13"
 description = "Records GTFS-realtime feeds and publishes them as TIDES data packages"
 license = "AGPL-3.0-or-later"
 dependencies = [
+    "dagster==1.13.24",
+    "dagster-postgres==0.29.24",
+    "gtfs-realtime-bindings>=1.0",
     "httpx>=0.28",
     "obstore>=0.12",
     "pydantic>=2.12",
     "pyyaml>=6.0",
+    "shapely>=2.1",
     "zstandard>=0.25",
 ]
 
@@ -19,6 +23,7 @@ gtfs-zone-rt-archive = "gtfs_zone_rt_archive.cli:main"
 dev = [
     "commitizen",
     "deptry>=0.25.1",
+    "frictionless>=5.21.0",
     "pytest",
     "ruff",
     "vulture>=2.16",
@@ -45,11 +50,17 @@ select = ["E", "F", "I", "UP", "B", "SIM", "ANN", "TC", "RUF"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 
+[tool.deptry]
+per_rule_ignores.DEP002 = [
+    "dagster-postgres",  # run storage, named in the infra dagster.yaml
+]
+
 [tool.vulture]
 paths = ["src"]
 ignore_decorators = ["@field_validator", "@model_validator"]
-# main: console script. producer, build_lag_days, lines: read by the TIDES build.
-ignore_names = ["cls", "model_config", "main", "producer", "build_lag_days", "lines"]
+# main: console script. defs: loaded by `dagster api grpc -m`. lines: reader
+# for a local data dir, used by the tests.
+ignore_names = ["cls", "model_config", "main", "defs", "lines"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
