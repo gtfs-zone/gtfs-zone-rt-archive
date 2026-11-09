@@ -10,8 +10,8 @@ accuracy.rt.gtfs.zone).
   gtfs-zone-infra and writes raw hourly files to the private Garage bucket
   `rt-archive`.
 - **TIDES build**: Dagster code location in feed-catalog's Dagster instance,
-  one daily partition per feed, writing to the public Garage website bucket
-  `archive.rt.gtfs.zone`.
+  one daily partition per feed, writing to the public B2 bucket served at
+  `rt-archive.gtfs.zone`.
 - **Handoff format**: TIDES CSV plus the `stop_time_predictions` table from
   the `gtfs-zone/predictions` branch of
   [gtfs-zone/TIDES](https://github.com/gtfs-zone/TIDES).

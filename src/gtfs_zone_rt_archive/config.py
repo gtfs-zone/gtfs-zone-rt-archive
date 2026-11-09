@@ -64,10 +64,11 @@ class S3Settings:
 
     @classmethod
     def from_env(cls, prefix: str = "") -> Self:
+        """Prefixed settings; endpoint and region fall back to the unprefixed ones."""
         return cls(
-            endpoint=_env("S3_ENDPOINT"),
+            endpoint=_env(f"{prefix}S3_ENDPOINT", os.environ.get("S3_ENDPOINT")),
             bucket=_env(f"{prefix}S3_BUCKET"),
-            region=_env("S3_REGION", "garage"),
+            region=_env(f"{prefix}S3_REGION", os.environ.get("S3_REGION", "garage")),
             access_key=_env(f"{prefix}S3_ACCESS_KEY"),
             secret_key=_env(f"{prefix}S3_SECRET_KEY"),
         )

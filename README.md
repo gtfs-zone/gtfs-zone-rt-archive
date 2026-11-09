@@ -44,6 +44,7 @@ uv run --with dagster-webserver==1.13.24 dagster dev -m gtfs_zone_rt_archive.pip
 | `S3_ENDPOINT`, `S3_REGION` | -, `garage` | S3-compatible storage |
 | `RAW_S3_BUCKET`, `RAW_S3_ACCESS_KEY`, `RAW_S3_SECRET_KEY` | - | raw bucket (read) |
 | `TIDES_S3_BUCKET`, `TIDES_S3_ACCESS_KEY`, `TIDES_S3_SECRET_KEY` | - | public bucket |
+| `RAW_S3_ENDPOINT`, `RAW_S3_REGION`, `TIDES_S3_ENDPOINT`, `TIDES_S3_REGION` | `S3_ENDPOINT`, `S3_REGION` | per-bucket storage |
 | `GATUS_URL`, `GATUS_ENDPOINT_KEY`, `GATUS_TOKEN` | unset | publish heartbeat |
 
 Public layout: `tides/<feed>/<date>/{datapackage.json, <table>.csv}` (CSVs

@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from gtfs_zone_rt_archive.config import FeedsFile
+from gtfs_zone_rt_archive.config import FeedsFile, S3Settings
 
 FEEDS = """
 feeds:
@@ -62,3 +62,32 @@ def test_invalid_files_are_rejected(tmp_path, old, new):
     assert old in FEEDS
     with pytest.raises(ValidationError):
         _load(tmp_path, FEEDS.replace(old, new))
+
+
+def test_s3_endpoint_and_region_fall_back_to_shared(monkeypatch):
+    for k, v in {
+        "S3_ENDPOINT": "http://garage:3900",
+        "RAW_S3_BUCKET": "rt-archive",
+        "RAW_S3_ACCESS_KEY": "ra",
+        "RAW_S3_SECRET_KEY": "rs",
+        "TIDES_S3_ENDPOINT": "https://s3.us-east-005.backblazeb2.com",
+        "TIDES_S3_REGION": "us-east-005",
+        "TIDES_S3_BUCKET": "gtfs-zone-rt-archive",
+        "TIDES_S3_ACCESS_KEY": "ta",
+        "TIDES_S3_SECRET_KEY": "ts",
+    }.items():
+        monkeypatch.setenv(k, v)
+    monkeypatch.delenv("S3_REGION", raising=False)
+    raw, tides = S3Settings.from_env("RAW_"), S3Settings.from_env("TIDES_")
+    assert (raw.endpoint, raw.region) == ("http://garage:3900", "garage")
+    assert (tides.endpoint, tides.region) == (
+        "https://s3.us-east-005.backblazeb2.com",
+        "us-east-005",
+    )
+
+
+def test_s3_endpoint_is_required(monkeypatch):
+    monkeypatch.delenv("S3_ENDPOINT", raising=False)
+    monkeypatch.delenv("X_S3_ENDPOINT", raising=False)
+    with pytest.raises(KeyError):
+        S3Settings.from_env("X_")
