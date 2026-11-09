@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 VERSION = version("gtfs-zone-rt-archive")
-BASE_URL = "https://archive.rt.gtfs.zone"
+BASE_URL = "https://rt-archive.gtfs.zone"
 # The gtfs-zone/predictions commit the vendored schemas were copied from.
 TIDES_REF = "5a28cac520840de06f59479f8f098825b4f348e5"
 TIDES_SPEC = f"https://raw.githubusercontent.com/gtfs-zone/TIDES/{TIDES_REF}/spec"
