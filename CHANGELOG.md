@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.0 (2026-11-11)
+
+### Feat
+
+- **tides**: per-bucket S3 endpoint and the rt-archive.gtfs.zone host
+- **tides**: write scheduled_stop_sequence on stop_time_predictions
+
 ## v0.2.1 (2026-11-05)
 
 ### Fix
