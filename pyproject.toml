@@ -15,6 +15,7 @@ dependencies = [
     "shapely>=2.1",
     # 2.1 drives postgresql:// with psycopg 3; the instance uses psycopg2.
     "sqlalchemy>=2.0,<2.1",
+    "tzfpy>=2.1.2",
     "zstandard>=0.25",
 ]
 

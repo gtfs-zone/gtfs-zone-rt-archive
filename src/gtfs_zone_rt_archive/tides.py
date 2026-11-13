@@ -17,8 +17,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from importlib import resources
 from typing import TYPE_CHECKING, Any
+from zoneinfo import ZoneInfo
 
 from google.transit import gtfs_realtime_pb2
+from tzfpy import get_tz
 
 from gtfs_zone_rt_archive.actuals import actual_times
 
@@ -179,11 +181,43 @@ class Package:
     counts: dict[str, int]
 
 
+_EASTERN = "America/New_York"
+# Slack for clock skew when rejecting re-read timestamps that land after the poll.
+_FUTURE_SLACK = 120
+
+
+def eastern_wall_clock_fix(ts: int, lon: float, lat: float, c: float) -> int:
+    """Re-read `ts`, a local wall clock taken as Eastern, in its real zone.
+
+    The zone is the one at the fix, or Eastern; the latest reading not after
+    the poll at `c` wins, else the reading in the zone at the fix.
+    """
+    wall = datetime.fromtimestamp(ts, ZoneInfo(_EASTERN)).replace(tzinfo=None)
+    geo = get_tz(lon, lat)
+    if not geo or geo.startswith("Etc/"):
+        geo = _EASTERN
+    readings = [
+        int(wall.replace(tzinfo=ZoneInfo(z)).timestamp())
+        for z in dict.fromkeys([geo, _EASTERN])
+    ]
+    past = [r for r in readings if r <= c + _FUTURE_SLACK]
+    return max(past) if past else readings[0]
+
+
 class DayBuilder:
-    def __init__(self, gtfs: Gtfs, service_date: date, producer: str) -> None:
+    def __init__(
+        self,
+        gtfs: Gtfs,
+        service_date: date,
+        producer: str,
+        eastern_wall_clock_until: float | None = None,
+    ) -> None:
         self.gtfs = gtfs
         self.date = service_date
         self.producer = producer
+        self.eastern_wall_clock_until = eastern_wall_clock_until
+        # (vehicle id, recorded timestamp) to its corrected value, this poll only
+        self.fixed_ts: dict[tuple[str, int], int] = {}
         self.trips: dict[str, _Performed] = {}
         self.pings: dict[str, dict[str, Any]] = {}
         self.skipped: Counter[str] = Counter()
@@ -220,6 +254,7 @@ class DayBuilder:
     def add(self, poll: Poll) -> None:
         if poll.resumed_after is not None:
             self.withdraw_all(poll.resumed_after)
+        self.fixed_ts.clear()
         if poll.vp is not None:
             self._add_vp(poll.vp, poll.c)
         if poll.tu is not None:
@@ -235,6 +270,12 @@ class DayBuilder:
                 continue
             vid = vp.vehicle.id or vp.vehicle.label or ent.id
             ts = vp.timestamp or header_ts
+            until = self.eastern_wall_clock_until
+            if vp.timestamp and until is not None and c < until:
+                pos = vp.position
+                fixed = eastern_wall_clock_fix(ts, pos.longitude, pos.latitude, c)
+                self.fixed_ts[(vid, ts)] = fixed
+                ts = fixed
             ping_id = f"{vid}:{ts}"
             if ping_id in self.pings:
                 continue
@@ -279,6 +320,9 @@ class DayBuilder:
                 continue
             tu = ent.trip_update
             ts = tu.timestamp or header_ts
+            vid = (tu.vehicle.id or None) if tu.HasField("vehicle") else None
+            if vid is not None:
+                ts = self.fixed_ts.get((vid, ts), ts)
             perf, _ = self._resolve(tu.trip, ts)
             if perf is None:
                 continue
@@ -287,7 +331,6 @@ class DayBuilder:
                 continue  # a second update for the trip, or an older one
             seen.add(key)
             states = predict(perf.trip, perf.sched, tu)
-            vid = (tu.vehicle.id or None) if tu.HasField("vehicle") else None
             for idx in set(perf.last) | set(states):
                 self._emit(perf, idx, ts, states.get(idx, WITHDRAWN), vid)
             perf.last_tu_ts = ts

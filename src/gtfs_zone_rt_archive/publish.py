@@ -106,7 +106,10 @@ def build_day(
     start = gtfs.midnight(d)
     end = gtfs.midnight(d + timedelta(days=feed.build_lag_days + 1))
     rec = raw.Recording(raw_store, name, start, end)
-    builder = DayBuilder(gtfs, d, feed.producer)
+    until = feed.vp_eastern_wall_clock_until
+    builder = DayBuilder(
+        gtfs, d, feed.producer, until.timestamp() if until is not None else None
+    )
     t0 = time.monotonic()
     for poll in rec.polls():
         builder.add(poll)

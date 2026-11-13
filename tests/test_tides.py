@@ -7,7 +7,12 @@ from helpers import gtfs_zip, local, lon_at, tu_message, vp_message
 
 from gtfs_zone_rt_archive.gtfs import Gtfs
 from gtfs_zone_rt_archive.raw import Poll
-from gtfs_zone_rt_archive.tides import DayBuilder, iso, predict
+from gtfs_zone_rt_archive.tides import (
+    DayBuilder,
+    eastern_wall_clock_fix,
+    iso,
+    predict,
+)
 
 D = date(2026, 11, 5)
 SD = "20261105"
@@ -234,3 +239,51 @@ def test_two_values_at_one_timestamp_keep_the_newer():
         tu.entity[0].trip_update.timestamp = A
         b.add(Poll(c, vp_message(c, fix), tu))
     assert _predictions(b.finish(), 3) == [(iso(A), iso(C + 60))]
+
+
+# Klamath Falls area at 42 N: Pacific time.
+PACIFIC_LON = -121.0
+H3 = 3 * 3600
+
+
+def test_eastern_wall_clock_fix_rereads_in_the_local_zone():
+    bad = local("2026-11-13", "10:16:40")  # 10:16:40 read as Eastern
+    assert eastern_wall_clock_fix(bad, PACIFIC_LON, 42.0, bad + H3 + 30) == bad + H3
+    assert eastern_wall_clock_fix(bad, -73.8, 42.0, bad + 30) == bad
+
+
+def test_eastern_wall_clock_fix_keeps_an_eastern_stamp_in_the_west():
+    ts = local("2026-11-13", "13:25:40")
+    assert eastern_wall_clock_fix(ts, PACIFIC_LON, 42.0, ts + 30) == ts
+
+
+def test_fixes_before_the_cutoff_are_reread_and_later_ones_kept():
+    bad = local("2026-11-05", "09:00:00")
+    cutoff = bad + H3 + 60
+    b = DayBuilder(G, D, "test", eastern_wall_clock_until=cutoff)
+    b.add(_poll(bad + H3 + 30, [("t1", None, None, PACIFIC_LON, bad)]))
+    b.add(_poll(cutoff + 30, [("t2", None, None, PACIFIC_LON, cutoff)]))
+    rows = {r["vehicle_id"]: r for r in b.finish().tables["vehicle_locations"]}
+    assert rows["t1"]["event_timestamp"] == iso(bad + H3)
+    assert rows["t2"]["event_timestamp"] == iso(cutoff)
+
+
+def test_a_reread_fix_moves_to_its_service_date():
+    late = local("2026-11-04", "23:00:00")  # true 02:00 Eastern on the 5th
+    early = local("2026-11-05", "23:00:00")  # true 02:00 Eastern on the 6th
+    b = DayBuilder(G, D, "test", eastern_wall_clock_until=early + H3 + 60)
+    b.add(_poll(late + H3 + 30, [("t1", None, None, PACIFIC_LON, late)]))
+    b.add(_poll(early + H3 + 30, [("t2", None, None, PACIFIC_LON, early)]))
+    (ping,) = b.finish().tables["vehicle_locations"]
+    assert ping["event_timestamp"] == iso(late + H3)
+
+
+def test_trip_update_timestamps_follow_their_vehicle_fix():
+    bad = A - H3 - 60  # T1 is due at A; the fix is a minute before
+    c = bad + H3 + 30
+    b = DayBuilder(G, D, "test", eastern_wall_clock_until=c + 60)
+    tu = tu_message(c, [("T1", SD, [(3, 60)])])
+    tu.entity[0].trip_update.vehicle.id = "t1"
+    tu.entity[0].trip_update.timestamp = bad
+    b.add(Poll(c, vp_message(c, [("t1", "T1", SD, PACIFIC_LON, bad)]), tu, None))
+    assert _predictions(b.finish(), 3) == [(iso(bad + H3), iso(C + 60))]
