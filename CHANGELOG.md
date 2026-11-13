@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.1 (2026-11-13)
+
+### Fix
+
+- **tides**: re-read Eastern wall-clock VehiclePosition timestamps
+
 ## v0.3.0 (2026-11-11)
 
 ### Feat
