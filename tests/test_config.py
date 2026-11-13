@@ -15,6 +15,7 @@ feeds:
     trip_updates: http://gtfs-api:8000/amtrak/trip_updates.pb
     service_alerts: http://gtfs-api:8000/amtrak/service_alerts.pb
     build_lag_days: 3
+    vp_eastern_wall_clock_until: 2026-11-13T20:00:00Z
   suntran:
     enabled: false
     producer: suntran
@@ -36,6 +37,8 @@ def test_defaults_and_overrides(tmp_path):
     amtrak, suntran = cfg.feeds["amtrak"], cfg.feeds["suntran"]
     assert (amtrak.poll, amtrak.build_lag_days) == (15, 3)
     assert (suntran.poll, suntran.build_lag_days) == (30, 1)
+    assert amtrak.vp_eastern_wall_clock_until.timestamp() == 1794600000
+    assert suntran.vp_eastern_wall_clock_until is None
 
 
 def test_enabled_skips_disabled_feeds(tmp_path):

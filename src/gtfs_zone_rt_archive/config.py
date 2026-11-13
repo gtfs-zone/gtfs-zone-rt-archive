@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Annotated, Self
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints
 
 # Feed names are path segments in both buckets and Dagster partition keys.
 FeedName = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9-]*$")]
@@ -25,6 +25,9 @@ class Feed(BaseModel):
     service_alerts: str | None = Field(default=None, pattern=r"^https?://")
     poll: int = Field(default=15, ge=5, le=300)
     build_lag_days: int = Field(default=1, ge=1, le=7)
+    # Polls before this instant carry VehiclePosition timestamps that are the
+    # local wall clock read as America/New_York; the build re-reads them.
+    vp_eastern_wall_clock_until: AwareDatetime | None = None
 
     def rt_urls(self) -> dict[str, str]:
         """GTFS-RT URLs by raw line `feed` kind: vp, tu and al when set."""
