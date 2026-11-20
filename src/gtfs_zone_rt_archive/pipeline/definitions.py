@@ -95,8 +95,7 @@ def tides_package(context: AssetExecutionContext) -> MaterializeResult:
 tides_job = define_asset_job("tides", selection=[tides_package])
 
 
-# After feed-catalog (09:00), timetable-sites (11:00) and crimes (14:00), which
-# share the instance's single-run queue.
+# After feed-catalog (09:00), timetable-sites (11:00) and crimes (14:00).
 @schedule(
     job=tides_job,
     cron_schedule="0 16 * * *",
