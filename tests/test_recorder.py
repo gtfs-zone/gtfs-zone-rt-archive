@@ -7,7 +7,7 @@ import threading
 import httpx
 from obstore.store import MemoryStore
 
-from gtfs_zone_rt_archive.config import Feed
+from gtfs_zone_rt_archive.config import Feed, Upstream
 from gtfs_zone_rt_archive.heartbeat import Health
 from gtfs_zone_rt_archive.recorder import FeedRecorder
 from gtfs_zone_rt_archive.store import lines
@@ -107,3 +107,48 @@ def test_a_static_error_is_logged_and_polling_goes_on(tmp_path):
     static = [line for line in lines(tmp_path / "amtrak") if line["k"] == "static"]
     assert "error" in static[0]
     assert health.failing(static[0]["t"]) == []
+
+
+def test_upstream_urls_are_recorded_with_headers_and_redirects_kept(tmp_path):
+    feed = FEED.model_copy(
+        update={
+            "upstream": {
+                "live": Upstream(
+                    url="https://up.example.com/live", headers={"X-Test": "1"}
+                ),
+                "dormant": Upstream(url="https://up.example.com/dormant"),
+                "down": Upstream(url="https://up.example.com/down"),
+            }
+        }
+    )
+    seen = []
+
+    def handler(request):
+        if request.url.host == "up.example.com":
+            seen.append((request.url.path, request.headers.get("x-test")))
+            if request.url.path == "/dormant":
+                return httpx.Response(302, headers={"location": "/live"})
+            if request.url.path == "/down":
+                raise httpx.ConnectError("refused")
+            return httpx.Response(200, content=b'{"active": true}')
+        return _handler(request)
+
+    rec = FeedRecorder(
+        "amtrak",
+        feed,
+        tmp_path,
+        Uploader(MemoryStore(), tmp_path),
+        Health(["amtrak"]),
+        transport=httpx.MockTransport(handler),
+    )
+    _run_once(rec)
+
+    raw = [line for line in lines(tmp_path / "amtrak") if line["k"] == "raw"]
+    up = {line["name"]: line for line in raw if line["feed"] == "up"}
+    assert list(up) == ["live", "dormant", "down"]
+    assert base64.b64decode(up["live"]["b64"]) == b'{"active": true}'
+    assert up["dormant"]["status"] == 302
+    assert "error" in up["down"]
+    assert {line["c"] for line in raw} == {raw[0]["c"]}
+    # The redirect was not followed, and headers go only where configured.
+    assert seen == [("/live", "1"), ("/dormant", None), ("/down", None)]

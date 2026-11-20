@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from types import FrameType
 
-    from gtfs_zone_rt_archive.config import Feed
+    from gtfs_zone_rt_archive.config import Feed, Upstream
 
 log = logging.getLogger(__name__)
 
@@ -128,6 +128,31 @@ class FeedRecorder:
                 self.health.ok(self.name, kind, rec["t"])
             else:
                 log.warning("%s: %s returned %d", self.name, kind, r.status_code)
+        for name, up in self.feed.upstream.items():
+            self.poll_upstream(http, writer, c, name, up)
+
+    def poll_upstream(
+        self, http: httpx.Client, writer: Writer, c: float, name: str, up: Upstream
+    ) -> None:
+        """Record one upstream URL as-is; a redirect is stored, not followed."""
+        rec: dict[str, Any] = {
+            "t": time.time(),
+            "feed": "up",
+            "name": name,
+            "method": "GET",
+            "url": up.url,
+        }
+        try:
+            r = http.get(up.url, headers=up.headers, follow_redirects=False)
+        except httpx.HTTPError as exc:
+            log.warning("%s: upstream %s failed: %r", self.name, name, exc)
+            writer.write(
+                writer.raw_line({**rec, "c": c, "error": repr(exc)}, None), at=c
+            )
+            return
+        writer.write(
+            writer.raw_line({**rec, "c": c, "status": r.status_code}, r.content), at=c
+        )
 
     def run(self, stop: threading.Event) -> None:
         writer = Writer(self.dir, on_compressed=self.uploader.wake)

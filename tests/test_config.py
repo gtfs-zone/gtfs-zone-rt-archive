@@ -16,6 +16,11 @@ feeds:
     service_alerts: http://gtfs-api:8000/amtrak/service_alerts.pb
     build_lag_days: 3
     vp_eastern_wall_clock_until: 2026-11-13T20:00:00Z
+    upstream:
+      route_a:
+        url: https://example.com/routes/a
+        headers:
+          X-Requested-With: XMLHttpRequest
   suntran:
     enabled: false
     producer: suntran
@@ -41,6 +46,14 @@ def test_defaults_and_overrides(tmp_path):
     assert suntran.vp_eastern_wall_clock_until is None
 
 
+def test_upstream_urls_and_headers(tmp_path):
+    cfg = _load(tmp_path)
+    up = cfg.feeds["amtrak"].upstream["route_a"]
+    assert up.url == "https://example.com/routes/a"
+    assert up.headers == {"X-Requested-With": "XMLHttpRequest"}
+    assert cfg.feeds["suntran"].upstream == {}
+
+
 def test_enabled_skips_disabled_feeds(tmp_path):
     assert list(_load(tmp_path).enabled()) == ["amtrak"]
 
@@ -59,6 +72,8 @@ def test_rt_urls_include_alerts_only_when_set(tmp_path):
         ("    poll: 30", "    poll: 1"),  # too fast
         ("https://example.com/vp.pb", "example.com/vp.pb"),  # not a URL
         ("    enabled: false\n", ""),  # enabled is required
+        ("        headers:", "        header:"),  # unknown upstream key
+        ("https://example.com/routes/a", "example.com/routes/a"),  # not a URL
     ],
 )
 def test_invalid_files_are_rejected(tmp_path, old, new):

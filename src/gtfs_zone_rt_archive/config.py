@@ -14,6 +14,15 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StringConstrai
 FeedName = Annotated[str, StringConstraints(pattern=r"^[a-z0-9][a-z0-9-]*$")]
 
 
+class Upstream(BaseModel):
+    """A non-GTFS-RT URL recorded verbatim on every poll, e.g. a provider API."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    url: str = Field(pattern=r"^https?://")
+    headers: dict[str, str] = {}
+
+
 class Feed(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -28,6 +37,8 @@ class Feed(BaseModel):
     # Polls before this instant carry VehiclePosition timestamps that are the
     # local wall clock read as America/New_York; the build re-reads them.
     vp_eastern_wall_clock_until: AwareDatetime | None = None
+    # Upstream responses recorded as raw `up` lines, keyed by a short name.
+    upstream: dict[str, Upstream] = {}
 
     def rt_urls(self) -> dict[str, str]:
         """GTFS-RT URLs by raw line `feed` kind: vp, tu and al when set."""
