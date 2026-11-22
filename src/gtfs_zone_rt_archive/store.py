@@ -9,7 +9,8 @@ Line kinds (`k`):
 - start:  {t, feed, version, poll}
 - raw:    {t, c, feed, method, url, status, sha, b64 | same} or {..., error}
           b64 is the response body; same means the body equals this URL's
-          previous one in the segment. `feed` is vp, tu or al.
+          previous one in the segment. `feed` is vp, tu, al, or up for an
+          upstream URL, which also carries its `name`.
 - static: {t, sha8, new, last_modified} or {t, error}
 `c` is the poll start time; a poll's raw lines share it and its segment.
 """

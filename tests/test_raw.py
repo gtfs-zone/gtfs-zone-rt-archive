@@ -64,3 +64,22 @@ def test_polls_outside_the_window_are_skipped(store):
     )
     rec = Recording(store, "f", H13 + 20, H13 + 3600)
     assert [p.c for p in rec.polls()] == [H13 + 3000]
+
+
+def test_upstream_lines_do_not_split_or_spoil_polls(store):
+    up = {
+        "k": "raw",
+        "t": H13,
+        "c": H13,
+        "feed": "up",
+        "name": "route_a",
+        "method": "GET",
+        "url": "http://x/up",
+        "status": 200,
+        "sha": "0",
+        "b64": "bm90IHByb3RvYnVm",
+    }
+    put_segment(store, "f", f"{_hour(H13)}.jsonl.zst", [*_poll(H13), up])
+    polls = list(Recording(store, "f", H13, H13 + 3600).polls())
+    assert [p.c for p in polls] == [H13]
+    assert polls[0].good
