@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4.0 (2026-11-22)
+
+### Feat
+
+- **recorder**: record per-feed upstream URLs as raw up lines
+
 ## v0.3.1 (2026-11-13)
 
 ### Fix
