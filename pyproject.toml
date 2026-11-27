@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 description = "Records GTFS-realtime feeds and publishes them as TIDES data packages"
 license = "AGPL-3.0-or-later"
 dependencies = [
-    "dagster==1.13.24",
+    "dagster==1.13.31",
     "dagster-postgres==0.29.24",
     "gtfs-realtime-bindings>=1.0",
     "httpx>=0.28",
