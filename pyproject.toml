@@ -6,7 +6,7 @@ description = "Records GTFS-realtime feeds and publishes them as TIDES data pack
 license = "AGPL-3.0-or-later"
 dependencies = [
     "dagster==1.13.24",
-    "dagster-postgres==0.29.24",
+    "dagster-postgres==0.29.31",
     "gtfs-realtime-bindings>=1.0",
     "httpx>=0.28",
     "obstore>=0.12",
